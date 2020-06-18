@@ -12,7 +12,7 @@ module.exports = {
   //注册成功的信息
   registerSuccess: {
     "msg": "注册成功",
-    "status": 200
+    "status": 201
   },
   //登录成功的信息
   loginSuccess: {

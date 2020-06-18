@@ -4,7 +4,7 @@
  */
 
 const seq = require('../seq')
-const { STRING, INTEGER, BOOLEAN, DECIMAL, SMALLINT, TEXT, ENUM } = require('../seqTypes')
+const { STRING, INTEGER, BOOLEAN, DECIMAL, SMALLINT, TEXT, ENUM, CHAR } = require('../seqTypes')
 
 const Goods = seq.define('goods', {
   goods_id: {
@@ -38,6 +38,9 @@ const Goods = seq.define('goods', {
     type: INTEGER,
     unique: true,
   },
+  goods_introduce: {
+    type: TEXT
+  },
   add_time: {
     type: INTEGER,
     unique: true,
@@ -58,6 +61,7 @@ const Goods = seq.define('goods', {
   timestamps: false //去除createAt
 });
 
+//goodsAttrs表
 const GoodsAttrs = seq.define('goods_attrs', {
   goods_id: {
     type: INTEGER,  //整型
@@ -73,6 +77,37 @@ const GoodsAttrs = seq.define('goods_attrs', {
   add_price: {
     type: DECIMAL(8, 2),
   },
+}, {
+  timestamps: false //去除createAt
+})
+
+//goodsPic表
+const GoodsPics = seq.define('goods_attrs', {
+  pics_id: {
+    primaryKey: true, //主键
+    type: INTEGER,  //整型
+    allowNull: false, //数据不能为空
+    unique: true, //用户数据不能重复
+    autoIncrement: true, //自增
+  },
+  goods_id: {
+    type: INTEGER,  //整型
+    allowNull: false, //数据不能为空
+  },
+  pic_bigs: {
+    type: CHAR,
+    unique: true,
+  },
+  pics_mid: {
+    type: CHAR,
+    unique: true,
+  },
+  pics_sma: {
+    type: CHAR,
+    unique: true,
+  },
+}, {
+  timestamps: false //去除createAt
 })
 
 // //外键关联
@@ -92,4 +127,5 @@ Goods.hasMany(GoodsAttrs, {
 module.exports = {
   Goods,
   GoodsAttrs,
+  GoodsPics
 }

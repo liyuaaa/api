@@ -3,7 +3,7 @@
  * @author 李育
  */
 
-const { getOrder, createOredr, getOrderOne, getKuaidi } = require('../services/order')
+const { getOrder, getOrderOne, createOrder, getOrderOneData, getKuaidi } = require('../services/order')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
 const { getDataError, updateDataError } = require('../model/ErrorModel')
 const { getDataSuccess, updateDataSuccess } = require('../model/SuccessModel')
@@ -16,6 +16,24 @@ const { getDataSuccess, updateDataSuccess } = require('../model/SuccessModel')
  */
 async function selectOrder({ query, pagenum, pagesize }) {
   const result = await getOrder({ query, pagenum, pagesize })
+  if (!result[1]) {
+    return new ErrorModel(getDataError)
+  }
+  return new SuccessModel({
+    data: {
+      count: result[0],
+      data: result[1]
+    },
+    meta: getDataSuccess
+  })
+}
+
+/**
+ * 根据id获取订单数据
+ * @param {integer} id 订单id
+ */
+async function selectOrderOne(id) {
+  const result = await getOrderOne(id)
   if (!result) {
     return new ErrorModel(getDataError)
   }
@@ -31,11 +49,10 @@ async function selectOrder({ query, pagenum, pagesize }) {
  * @param {integer} is_send 订单是否发货
  * @param {integer} order_pay 订单支付
  * @param {integer} order_price 订单价格
- * @param {integer} order_number 订单数量
  * @param {integer} pay_status 支付状态
  */
-async function updateOrder({ id, is_send, order_pay, order_price, order_number, pay_status }) {
-  const result = await createOredr({ id, is_send, order_pay, order_price, order_number, pay_status })
+async function updateOrder({ id, is_send, order_pay, order_price, pay_status }) {
+  const result = await createOrder({ id, is_send, order_pay, order_price, pay_status })
   if (!result) {
     return new ErrorModel(updateDataError)
   }
@@ -48,8 +65,8 @@ async function updateOrder({ id, is_send, order_pay, order_price, order_number, 
  * 查看订单详情
  * @param {integer} id 订单id
  */
-async function selectOrderOne(id) {
-  const result = await getOrderOne(id)
+async function selectOrderData(id) {
+  const result = await getOrderOneData(id)
   if (!result) {
     return new ErrorModel(getDataError)
   }
@@ -75,7 +92,8 @@ async function selectKuaidi(id) {
 
 module.exports = {
   selectOrder,
-  updateOrder,
   selectOrderOne,
+  updateOrder,
+  selectOrderData,
   selectKuaidi
 }

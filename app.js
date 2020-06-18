@@ -16,6 +16,7 @@ const goods = require('./routes/api/goods')
 const roles = require('./routes/api/roles')
 const category = require('./routes/api/category')
 const order = require('./routes/api/order')
+const picture = require('./routes/api/picrure')
 
 //导入jwt
 const jwtKoa = require('koa-jwt')
@@ -47,11 +48,11 @@ app.use(async (ctx, next) => {
 })
 
 // jwt配置
-// app.use(jwtKoa({
-//   secret: jwtKeys //密钥
-// }).unless({
-//   path: [/^\/api\/login/, /^\/api\/register/, /^\/api\/isExist/], //数组中的路径不需要jwt校验
-// }))
+app.use(jwtKoa({
+  secret: jwtKeys //密钥
+}).unless({
+  path: [/^\/api\/login/, /^\/api\/register/, /^\/api\/isExist/], //数组中的路径不需要jwt校验
+}))
 
 // routes
 app.use(login.routes(), login.allowedMethods())
@@ -63,6 +64,7 @@ app.use(goods.routes(), goods.allowedMethods())
 app.use(roles.routes(), roles.allowedMethods())
 app.use(category.routes(), category.allowedMethods())
 app.use(order.routes(), order.allowedMethods())
+app.use(picture.routes(), picture.allowedMethods())
 
 // error-handling
 app.on('error', (err, ctx) => {

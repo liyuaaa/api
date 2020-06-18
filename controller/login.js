@@ -39,7 +39,7 @@ async function isExist(username) {
  * @param {boolean} mg_state 状态
  * @param {boolean} role_name 用户身份
  */
-async function register({ username, password, mobile, email, rid, mg_state, role_name }) {
+async function register({ username, password, mobile, email }) {
   //判断用户名是否存在
   const usernameResult = await getUsername(username);
   if (usernameResult) {
@@ -53,9 +53,6 @@ async function register({ username, password, mobile, email, rid, mg_state, role
       password: getCrypto(password),
       mobile,
       email,
-      rid,
-      mg_state,
-      role_name
     })
     // 注册成功
     return new SuccessModel({

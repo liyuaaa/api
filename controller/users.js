@@ -4,7 +4,7 @@
  */
 
 const { getUsername } = require('../services/login')
-const { getUsers, createUsers, setUsersType, getUsersOne, setUsers, removeUsers } = require('../services/users')
+const { getUsers, createUsers, setUsersType, getUsersOne, setUsers, removeUsers, setUsersRoles } = require('../services/users')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
 const { getDataError, createDataError, isExitsError, updateDataError, deleteDataError } = require('../model/ErrorModel')
 const { getDataSuccess, createDataSuccess, updateDataSuccess, deleteDataSuccess } = require('../model/SuccessModel')
@@ -114,11 +114,27 @@ async function deleteUsers(id) {
   })
 }
 
+/**
+ * 分配角色权限
+ * @param {integer} id 用户id
+ * @param {integer} rid 权限id
+ */
+async function updateUsersRole(id, rid) {
+  const result = await setUsersRoles(id, rid)
+  if (!result) {
+    return new ErrorModel(updateDataError)
+  }
+  return new SuccessModel({
+    meta: updateDataSuccess
+  })
+}
+
 module.exports = {
   selectUsers,
   insertUsers,
   updateUsersType,
   selectUsersOne,
   updateUsers,
-  deleteUsers
+  deleteUsers,
+  updateUsersRole
 }

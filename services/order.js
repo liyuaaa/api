@@ -15,6 +15,11 @@ const axios = require('axios')
  * @param {integer} pagesize 查询参数
  */
 async function getOrder({ query, pagenum, pagesize }) {
+  //存放数据
+  let ArrayData = [];
+  //获取条数
+  const { count: orderNum } = await Order.findAndCountAll()
+  ArrayData.push(orderNum)
   whereOption = {
     limit: parseInt(pagesize),
     offset: (pagenum - 1) * pagesize
@@ -32,7 +37,25 @@ async function getOrder({ query, pagenum, pagesize }) {
   if (!result) {
     return result;
   }
-  return result.map(item => item.dataValues)
+  const data = result.map(item => item.dataValues)
+  ArrayData.push(data)
+  return ArrayData
+}
+
+/**
+ * 根据id获取订单数据
+ * @param {integer} id 订单id
+ */
+async function getOrderOne(id) {
+  const result = await Order.findOne({
+    where: {
+      order_id: id
+    }
+  })
+  if (!result) {
+    return result
+  }
+  return result.dataValues
 }
 
 /**
@@ -41,21 +64,13 @@ async function getOrder({ query, pagenum, pagesize }) {
  * @param {integer} is_send 订单是否发货
  * @param {integer} order_pay 订单支付
  * @param {integer} order_price 订单价格
- * @param {integer} order_number 订单数量
  * @param {integer} pay_status 支付状态
  */
-async function createOredr({ id, is_send, order_pay, order_price, order_number, pay_status }) {
-  let is_sendData;
-  if (is_send == 1) {
-    is_sendData = "是"
-  } else {
-    is_sendData = "否"
-  }
+async function createOrder({ id, is_send, order_pay, order_price, pay_status }) {
   const result = await Order.update({
-    is_send: is_sendData,
+    is_send,
     order_pay,
     order_price,
-    order_number,
     pay_status,
     createdtime: Date.parse(new Date()) / 1000,
     updatedtime: Date.parse(new Date()) / 1000
@@ -71,7 +86,7 @@ async function createOredr({ id, is_send, order_pay, order_price, order_number, 
  * 查看订单详情
  * @param {integer} id 订单id
  */
-async function getOrderOne(id) {
+async function getOrderOneData(id) {
   const result = await Order.findOne({
     where: {
       order_id: id
@@ -103,7 +118,8 @@ async function getKuaidi(id) {
 
 module.exports = {
   getOrder,
-  createOredr,
   getOrderOne,
+  createOrder,
+  getOrderOneData,
   getKuaidi
 }

@@ -8,10 +8,18 @@ const { getRightsData } = require('./rights') //获取权限的数据
 /**
  * 查询角色列表数据
  */
-async function getRoles() {
-  const result = await Roles.findAll({
-    attributes: ['roleId', 'roleName', 'ps_ids', 'roleDesc']
-  });
+async function getRoles(roleId) {
+  whereOption = {
+    attributes: ['roleId', 'roleName', 'ps_ids', 'roleDesc'],
+  }
+  if (roleId) {
+    Object.assign(whereOption, {
+      where: {
+        roleId
+      }
+    })
+  }
+  const result = await Roles.findAll(whereOption);
   if (!result) {
     return result;
   }
@@ -31,7 +39,7 @@ async function getRoles() {
     //对二级权限添加children
     twoRights.map(twoItem => twoItem.chidren = threeRights.filter(threeItem => twoItem.id === threeItem.pid));
     //对一级权限添加children
-    oneRights.map(oneItem => oneItem.chidren = twoRightData.filter(twoItem => oneItem.id === twoItem.pid))
+    oneRights.map(oneItem => oneItem.chidren = twoRights.filter(twoItem => oneItem.id === twoItem.pid))
     return item.chidren = oneRights
   });
   return rolesData
@@ -123,7 +131,7 @@ async function createRolesAn({ roleId, rids }) {
 /**
  * 删除角色指定权限
  * @param {integer} roleId 角色 ID
- * @param {integer} roleId 权限 ID
+ * @param {integer} rightId 权限 ID
  */
 async function removeRolesAn({ roleId, rightId }) {
   //获取对应roleId的数据
@@ -140,7 +148,7 @@ async function removeRolesAn({ roleId, rightId }) {
   rightIdData.splice(rightIndex, 1)
   rightIdData = rightIdData.join(',')
 
-  //把获取到的数据重新修改
+  //把获取到的数据进行删除
   const result = await Roles.update({
     ps_ids: rightIdData
   }, {
@@ -151,9 +159,11 @@ async function removeRolesAn({ roleId, rightId }) {
   if (!result) {
     return result
   }
-  return result[0]
-
-  return result
+  let ArrayData = []; //存放数据
+  const roleData = await getRoles(roleId); //重新获取roles数据
+  ArrayData.push(roleData)
+  ArrayData.push(result[0])
+  return ArrayData
 }
 
 module.exports = {

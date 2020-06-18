@@ -2,7 +2,7 @@
  * @description 处理users的数据，进行操作查看
  * @author 李育
  */
-const { Users } = require('../db/module/users')
+const { Users, Roles } = require('../db/module/users')
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op; //导入Op包
 /**
@@ -20,7 +20,14 @@ async function getUsers({ query, pagesize, pagenum }) {
   Findquery = {
     limit: parseInt(pagesize), //每页显示页数
     offset: (pagenum - 1) * pagesize, //跳过几行 
-    attributes: ['id', 'rid', 'username', 'mobile', 'email', 'mg_state', 'role_name', 'createdAt'],
+    attributes: ['id', 'rid', 'username', 'mobile', 'email', 'mg_state', 'createdAt'],
+    include: [
+      {
+        model: Roles,
+        attributes: ['roleName'],
+        as: "rolename"
+      }
+    ]
   }
   if (query) {
     Object.assign(Findquery, {
@@ -36,7 +43,11 @@ async function getUsers({ query, pagesize, pagenum }) {
     UsersData.push(result);
     return UsersData;
   }
-  result = result.map(item => item.dataValues);
+  result = result.map(item => {
+    const data = item.dataValues
+    data.rolename = data.rolename.dataValues.roleName
+    return data;
+  });
   UsersData.push(result);
   return UsersData
 }
@@ -54,7 +65,7 @@ async function createUsers({ username, password, email, mobile }) {
     password,
     email,
     mobile,
-    rid: 1,
+    rid: 41,
     mg_state: true,
     role_name: "员工"
   })
@@ -134,11 +145,28 @@ async function removeUsers(id) {
   return result
 }
 
+/**
+ * 分配角色权限
+ * @param {integer} id 用户id
+ * @param {integer} rid 权限id
+ */
+async function setUsersRoles(id, rid) {
+  const result = await Users.update({
+    rid
+  }, {
+    where: {
+      id
+    }
+  })
+  return result[0]
+}
+
 module.exports = {
   getUsers,
   createUsers,
   setUsersType,
   getUsersOne,
   setUsers,
-  removeUsers
+  removeUsers,
+  setUsersRoles
 }

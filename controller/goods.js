@@ -3,7 +3,7 @@
  * @author 李育
  */
 
-const { getGoods, createGoods } = require('../services/goods')
+const { getGoods, createGoods, getGoodsOne, setGoods, removeGoods } = require('../services/goods')
 const { SuccessModel, ErrorModel } = require('../model/ResModel')
 const { getDataSuccess, createDataSuccess, updateDataSuccess, deleteDataSuccess } = require('../model/SuccessModel')
 const { getDataError, createDataError, updateDataError, deleteDataError } = require('../model/ErrorModel')
@@ -51,7 +51,58 @@ async function insertGoods({ goods_name, goods_cat, goods_price, goods_number, g
   })
 }
 
+/**
+ * 根据 ID 查询商品
+ * @param {integer} id 商品 ID
+ */
+async function selectGoodsOne(id) {
+  const result = await getGoodsOne(id)
+  if (!result) {
+    return new ErrorModel(getDataError)
+  }
+  return new SuccessModel({
+    data: result,
+    meta: getDataSuccess
+  })
+}
+
+/**
+ * 编辑提交商品
+ * @param {integer} id 商品 ID
+ * @param {string} goods_name 商品名称
+ * @param {integer} goods_price 价格
+ * @param {integer} goods_number 数量
+ * @param {integer} goods_weight 重量
+ */
+async function updateGoods({ id, goods_name, goods_price, goods_number, goods_weight }) {
+  const result = await setGoods({ id, goods_name, goods_price, goods_number, goods_weight })
+  console.log(result)
+  if (!result) {
+    return new ErrorModel(updateDataError)
+  }
+  return new SuccessModel({
+    meta: updateDataSuccess
+  })
+}
+
+/**
+ * 删除商品
+ * @param {integer} id 商品 ID
+ */
+async function deleteGoods(id) {
+  const result = await removeGoods(id)
+  if (!result) {
+    return new ErrorModel(deleteDataError)
+  }
+  return new SuccessModel({
+    meta: deleteDataSuccess
+  })
+}
+
 module.exports = {
   selectGoods,
-  insertGoods
+  insertGoods,
+  selectGoodsOne,
+  updateGoods,
+  deleteGoods
 }

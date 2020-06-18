@@ -4,6 +4,7 @@
  */
 
 const seq = require('../seq')
+const { Roles } = require('./roles')
 // 导入seq的数据类型
 const { STRING, INTEGER, BOOLEAN } = require('../seqTypes')
 
@@ -51,7 +52,21 @@ const Users = seq.define('users', {
   },
 });
 
+//关联查询
+Users.belongsTo(Roles, {
+  foreignKey: "rid",
+  targetKey: "roleId",
+  as: "rolename"
+})
+
+Roles.hasMany(Users, {
+  foreignKey: "rid",
+  targetKey: "roleId",
+  as: "rolename"
+})
+
 
 module.exports = {
-  Users
+  Users,
+  Roles
 }

@@ -3,7 +3,7 @@
  * @author 李育
  */
 
-const { Goods, GoodsAttrs } = require('../db/module/goods')
+const { Goods, GoodsAttrs, GoodsPics } = require('../db/module/goods')
 const Sequelize = require('sequelize');
 const Op = Sequelize.Op;
 
@@ -39,7 +39,6 @@ async function getGoods({ query, pagenum, pagesize }) {
   }
   result = result.map(item => item.dataValues);
   GoodsData.push(result);
-  console.log(GoodsData)
   return GoodsData
 }
 
@@ -56,10 +55,7 @@ async function getGoods({ query, pagenum, pagesize }) {
  */
 async function createGoods({ goods_name, goods_cat, goods_price, goods_number, goods_weight, goods_introduce, pics, attrs }) {
   const result = await createGoodsData({ goods_name, goods_cat, goods_price, goods_number, goods_weight, goods_introduce, pics, attrs });
-  if (!result) {
-    return result
-  }
-  return result.dataValues
+  return result
 }
 
 //添加数据业务逻辑
@@ -71,10 +67,12 @@ async function createGoodsData({ goods_name, goods_cat, goods_price, goods_numbe
       goods_name
     }
   })
-  if (!goods_name_data) {
+  if (goods_name_data != null) {
     //查到用户名相同
+    console.log("数据重复")
     return null;
   }
+  //添加数据到goods表
   let result = await Goods.create({
     goods_name,
     goods_price,
@@ -95,17 +93,86 @@ async function createGoodsData({ goods_name, goods_cat, goods_price, goods_numbe
       ['goods_id', 'desc']
     ]
   })
-
   //添加goods_attrs数据
-  result = await GoodsAttrs.create({
-    goods_id: goods_id_max.dataValues,
-    attr_id: attrs.attr_id,
-    attr_value: attrs.attr_val
+  if (attrs != null) {
+    attrs.forEach(async item => {
+      result = await GoodsAttrs.create({
+        goods_id: goods_id_max.dataValues.goods_id,
+        attr_id: item.attr_id,
+        attr_value: item.attr_val
+      })
+    });
+  }
+
+  //添加图片
+  if (pics != null) {
+    pics.forEach(async item => {
+      result = await GoodsPics.create({
+        goods_id: goods_id_max,
+        pics_big: item.pic,
+        pics_mid: item.pic,
+        pics_sma: item.pic,
+      })
+    })
+  }
+  return result.dataValues
+}
+
+/**
+ * 根据 ID 查询商品
+ * @param {integer} id 商品 ID
+ */
+async function getGoodsOne(id) {
+  const result = await Goods.findOne({
+    where: {
+      goods_id: id
+    }
+  })
+  if (!result) {
+    return result;
+  }
+  return result.dataValues
+}
+
+/**
+ * 编辑提交商品
+ * @param {integer} id 商品 ID
+ * @param {string} goods_name 商品名称
+ * @param {integer} goods_price 价格
+ * @param {integer} goods_number 数量
+ * @param {integer} goods_weight 重量
+ */
+async function setGoods({ id, goods_name, goods_price, goods_number, goods_weight }) {
+  const result = await Goods.update({
+    goods_name,
+    goods_price,
+    goods_number,
+    goods_weight
+  }, {
+    where: {
+      goods_id: id
+    }
+  })
+  return result[0]
+}
+
+/**
+ * 删除商品
+ * @param {integer} id 商品 ID
+ */
+async function removeGoods(id) {
+  const result = await Goods.destroy({
+    where: {
+      goods_id: id
+    }
   })
   return result
 }
 
 module.exports = {
   getGoods,
-  createGoods
+  createGoods,
+  getGoodsOne,
+  setGoods,
+  removeGoods
 }

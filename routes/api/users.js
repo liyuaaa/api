@@ -1,12 +1,12 @@
 const router = require('koa-router')();
-const { selectUsers, insertUsers, updateUsersType, selectUsersOne, updateUsers, deleteUsers } = require('../../controller/users')
+const { selectUsers, insertUsers, updateUsersType, selectUsersOne, updateUsers, deleteUsers, updateUsersRole } = require('../../controller/users')
 
 // 路由前缀
 router.prefix('/api');
 
 //用户数据列表路由
 router.get('/users', async (ctx, next) => {
-  const { query, pagenum, pagesize } = ctx.request.body;
+  const { query, pagenum, pagesize } = ctx.query
   ctx.body = await selectUsers({ query, pagenum, pagesize })
 })
 
@@ -41,5 +41,11 @@ router.delete('/users/:id', async (ctx, body) => {
   ctx.body = await deleteUsers(id)
 })
 
-//
+//分配角色权限
+router.put('/users/:id/role', async (ctx, body) => {
+  const id = ctx.params.id;
+  const rid = ctx.request.body.rid
+  console.log(id, rid)
+  ctx.body = await updateUsersRole(id, rid)
+})
 module.exports = router

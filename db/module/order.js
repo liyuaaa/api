@@ -60,11 +60,11 @@ const Order = seq.define('order', {
     allowNull: false
   },
   createdtime: {
-    type: STRING(10),
+    type: INTEGER,
     allowNull: false
   },
   updatedtime: {
-    type: STRING(10),
+    type: INTEGER,
     allowNull: false
   }
 }, {

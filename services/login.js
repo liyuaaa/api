@@ -49,9 +49,9 @@ async function createUsers({ username, password, mobile, email, rid, mg_state, r
     password,
     mobile,
     email,
-    rid,
-    mg_state,
-    role_name
+    rid: 41,
+    mg_state: true,
+    role_name: "员工"
   })
   return result.dataValues
 }

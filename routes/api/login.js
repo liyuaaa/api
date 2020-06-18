@@ -12,8 +12,8 @@ router.post('/isExist', async (ctx, next) => {
 
 // 注册路由
 router.post('/register', async (ctx, next) => {
-  const { username, password, mobile, email, rid, mg_state, role_name } = ctx.request.body;
-  ctx.body = await register({ username, password, mobile, email, rid, mg_state, role_name })
+  const { username, password, mobile, email } = ctx.request.body;
+  ctx.body = await register({ username, password, mobile, email })
 })
 
 //登录路由

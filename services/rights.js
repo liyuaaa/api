@@ -31,7 +31,6 @@ async function listData() {
       attributes: ['pathname'],
       as: "path",
     },
-    group: 'level'
   })
   return getPath(result)
 }

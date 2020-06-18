@@ -3,7 +3,8 @@
  * @author 李育
  */
 
-const { Category } = require('../db/module/category')
+const { Category } = require('../db/module/category');
+const category = require('../db/module/category');
 
 /**
  * 获取商品分类数据列表
@@ -12,6 +13,14 @@ const { Category } = require('../db/module/category')
  * @param {integer} pagesize 每页显示多少条数据
  */
 async function getCagegory({ type = 3, pagenum, pagesize }) {
+  let ArrayData = []; //存放数据
+  //获取数据个数数量
+  const { count: resultNumber } = await Category.findAndCountAll({
+    where: {
+      cat_level: 0
+    }
+  });
+  ArrayData.push(resultNumber)
   const oneResult = await categoryFindAll(0, pagenum, pagesize)
   const twoResult = await categoryFindAll(1)
   const threeResult = await categoryFindAll(2)
@@ -40,7 +49,8 @@ async function getCagegory({ type = 3, pagenum, pagesize }) {
   if (!oneResult) {
     return result
   }
-  return oneResult
+  ArrayData.push(oneResult)
+  return ArrayData
 }
 
 //获取商品数据数据
@@ -69,6 +79,7 @@ async function categoryFindAll(level, pagenum = 0, pagesize = 0) {
  * @param {integer} cat_level 分类层级
  */
 async function addCategory({ cat_pid, cat_name, cat_level }) {
+  console.log(cat_level)
   const result = await Category.create({
     cat_pid,
     cat_name,

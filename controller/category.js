@@ -15,11 +15,14 @@ const { getDataError, createDataError, updateDataError, deleteDataError } = requ
  */
 async function selectCategory({ type, pagenum, pagesize }) {
   const result = await getCagegory({ type, pagenum, pagesize })
-  if (!result) {
+  if (!result[1]) {
     return new ErrorModel(getDataError)
   }
   return new SuccessModel({
-    data: result,
+    data: {
+      total: result[0],
+      data: result[1]
+    },
     meta: getDataSuccess
   })
 }

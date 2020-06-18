@@ -6,7 +6,8 @@ router.prefix('/api'); //路由前缀
 //获取参数列表
 router.get('/categories/:id/attributes', async (ctx, next) => {
   const { id } = ctx.params;
-  const { sel } = ctx.request.body;
+  const { sel } = ctx.query;
+  console.log(sel)
   ctx.body = await selectAttributes({ id, sel })
 })
 

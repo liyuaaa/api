@@ -14,11 +14,11 @@ const { getDataError, createDataError, deleteDataError, updateDataError } = requ
 async function selectRoles() {
   const result = await getRoles();
   if (!result) {
-    return new ErrorModel(getDataSuccess);
+    return new ErrorModel(getDataError);
   }
   return new SuccessModel({
     data: result,
-    meta: getDataError
+    meta: getDataSuccess
   })
 }
 
@@ -97,12 +97,18 @@ async function updateRolesAn({ roleId, rids }) {
   })
 }
 
+/**
+ * 删除角色指定权限
+ * @param {integer} roleId 角色 ID
+ * @param {integer} rightId 权限 ID
+ */
 async function deleteRolesAn({ roleId, rightId }) {
   const result = await removeRolesAn({ roleId, rightId });
-  if (!result) {
+  if (!result[1]) {
     return new ErrorModel(deleteDataError)
   }
   return new SuccessModel({
+    data: result[0],
     meta: deleteDataSuccess
   })
 }

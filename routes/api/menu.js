@@ -6,7 +6,7 @@ router.prefix('/api');
 /**
  * 获取左侧菜单栏数据
  */
-router.get('/menu', async (ctx, body) => {
+router.get('/menus', async (ctx, body) => {
   ctx.body = await selectMenu()
 })
 

@@ -11,5 +11,6 @@ module.exports = {
   BOOLEAN: Seq.BOOLEAN, //布尔类型
   SMALLINT: Seq.SMALLINT,//数据类型
   ENUM: Seq.ENUM,//枚举类型
-  MEDIUMINT: Seq.MEDIUMINT
+  MEDIUMINT: Seq.MEDIUMINT,
+  CHAR: Seq.CHAR
 }

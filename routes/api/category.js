@@ -4,7 +4,7 @@ const { selectCategory, insertCategory, selectCategoryOne, updateCategory, delet
 
 //获取数据
 router.get('/categories', async (ctx, body) => {
-  const { type, pagesize, pagenum } = ctx.request.body;
+  const { type, pagesize, pagenum } = ctx.query;
   ctx.body = await selectCategory({ type, pagesize, pagenum })
 })
 

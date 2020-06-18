@@ -2,7 +2,7 @@
 ## Author 李育
 
 ### 接口说明
-- 接口地址：`http: //127.0.0.1:8899/api/`
+- 接口地址：`http://127.0.0.1:8899/api/`
 1. 该接口使用koa+koa-generator(koa框架)来进行搭建接口
 2. 使用cross-env 来设置环境变量的插件
 ```
@@ -15,6 +15,7 @@
 6. 需要授权的 API ，必须在请求头中使用 `Authorization` 字段提供 `token` 令牌
 7. 获取快递数据，使用axios获取url
 8. 需要导入api.sql数据库数据
+9. 上传图片，使用formidable-upload-koa来进行图片上传
 ---------------------------------------------------------------
 ### 项目说明-文件名
 1. DB文件(定义模型，封装操作) --- 使用sequelize来进行数据库连接操作同步
@@ -57,9 +58,15 @@
 + 响应数据
 ```
 {
+  //用户名不存在显示的信息
   "meta": {
     "msg": "用户名不存在",
     "status": 200
+  }
+  //用户名存在显示的信息
+  "meta": {
+    "msg": "该用户名已经存在",
+    "status": 400
   }
 }
 ```
@@ -84,7 +91,7 @@
 ```
 meta: {
   "msg": "注册成功",
-  "status": 200
+  "status": 201
 }
 ```
 
@@ -290,10 +297,27 @@ meta: {
   }
 }
 ```
+### 1.2.7. 分配用户角色
++ 请求路径：users/:id/role
++ 请求方式：put
++ 请求参数
+|*参数名*|*参数说明*|*备注*|
+|-------|----------|------|
+|id|用户 ID|不能为空`参数是url参数:id`|
+|rid|角色 id|不能为空`参数body参数`|
++ 响应数据
+```
+{
+  "meta": {
+    "msg": "修改成功",
+    "status": 200
+  }
+}
+```
 
 ## 1.3.菜单栏
 ### 1.3.1.左侧菜单栏
-+ 请求路径：menu
++ 请求路径：menus
 + 请求方式：get
 + 响应数据
 ```
@@ -475,7 +499,11 @@ meta: {
         }
       ]
     }
-  ]
+  ],
+  "meta": {
+    "msg": "获取成功",
+    "status": 200
+  }
 }
 ```
 
@@ -575,11 +603,43 @@ meta: {
 |-------|----------|------|
 |:roleId|角色 ID|不能为空`携带在url中`|
 |rids|权限 ID 列表（字符串）|以 `,` 分割的权限 ID 列表（获取所有被选中、叶子节点的key和半选中节点的key, 包括 1，2，3级节点）|
-+ 响应数据
++ 响应数据--data是当前角色下最新的权限数据
 ```
 {
+  "data": [
+    {
+      "roleId": 41,
+      "roleName": "员工",
+      "ps_ids": "145,146,148",
+      "roleDesc": "哈哈",
+      "chidren": [
+        {
+          "id": 145,
+          "authname": "数据统计",
+          "pid": 0,
+          "path": "reports",
+          "chidren": [
+            {
+              "id": 146,
+              "authname": "数据报表",
+              "pid": 145,
+              "path": "reports",
+              "chidren": [
+                {
+                  "id": 148,
+                  "authname": "查看数据",
+                  "pid": 146,
+                  "path": "reports"
+                }
+              ]
+            }
+          ]
+        }
+      ]
+    }
+  ],
   "meta": {
-    "msg": "修改成功",
+    "msg": "删除成功",
     "status": 200
   }
 }
@@ -627,29 +687,32 @@ meta: {
 ```
 {
   "data": [
-    {
-      "cat_id": 172,
-      "cat_name": "苏宁房产",
-      "cat_pid": 0,
-      "cat_level": 0,
-      "cat_deleted": 0,
-      "children": [
+    "total":31,
+    "data": [
         {
-          "cat_id": 173,
-          "cat_name": "苏宁房产",
-          "cat_pid": 172,
-          "cat_level": 1,
-          "cat_deleted": 0,
-          "children": [
-            {
-              "cat_id": 183,
-              "cat_name": "恒大旅游",
-              "cat_pid": 173,
-              "cat_level": 2,
-              "cat_deleted": 0
-            }
-          ]
-        }
+        "cat_id": 172,
+        "cat_name": "苏宁房产",
+        "cat_pid": 0,
+        "cat_level": 0,
+        "cat_deleted": 0,
+        "children": [
+          {
+            "cat_id": 173,
+            "cat_name": "苏宁房产",
+            "cat_pid": 172,
+            "cat_level": 1,
+            "cat_deleted": 0,
+            "children": [
+              {
+                "cat_id": 183,
+                "cat_name": "恒大旅游",
+                "cat_pid": 173,
+                "cat_level": 2,
+                "cat_deleted": 0
+              }
+            ]
+          }
+        ]
       ]
     ],
   "meta": {
@@ -940,6 +1003,144 @@ meta: {
 }
 ```
 
+### 1.8.2.添加商品
++ 请求路径：goods
++ 请求方式：post
++ 请求参数
+
+|参数名|参数说明|备注|
+|---|---|---|
+|goods_name|商品名称|不能为空|
+|goods_cat|以为','分割的分类列表|不能为空|
+|goods_price|价格|不能为空|
+|goods_number|数量|不能为空|
+|goods_weight|重量|不能为空|
+|goods_introduce|介绍|可以为空|
+|pics|上传的图片临时路径（对象）|可以为空|
+|attrs|商品的参数（数组），包含`动态参数`和`静态属性`|可以为空|
++ 响应数据
+```
+{
+  "meta": {
+    "msg": "创建成功",
+    "status": 201
+  }
+}
+```
+
+### 1.8.3. 根据 ID 查询商品
++ 请求路径：goods/:id
++ 请求方式：get
++ 请求参数
+
+|*参数名*|*参数说明*|*备注*|
+|-------|----------|------|
+|id|商品 ID|不能为空`携带在url中`|
+- 响应参数
+
+|参数名|参数说明|备注|
+|-------|----------|------|
+|goods_id|商品ID||
+|goods_name|商品名称||
+|goods_price|价格||
+|goods_number|数量||
+|goods_weight|重量|不能为空|
+|goods_state|商品状态|商品状态0:未通过1:审核中2:已审核|
+|add_time|添加时间||
+|upd_time|更新时间||
+|hot_mumber|热销品数量||
+|is_promote|是否是热销品||
++ 响应数据
+```
+{
+  "data": {
+    "goods_id": 1,
+    "goods_name": "南极人女士三角内裤 中腰可爱无痕女士内裤 均码 k102P1027",
+    "goods_price": "49.00",
+    "goods_number": 100,
+    "goods_weight": 100,
+    "goods_state": 0,
+    "goods_introduce": "<div class=\"lazyimg\">...</div>",
+    "add_time": 1514255862,
+    "upd_time": 1514255862,
+    "hot_mumber": 0,
+    "is_promote": 0
+  },
+  "meta": {
+    "msg": "获取成功",
+    "status": 200
+  }
+}
+``` 
+
+### 1.8.4. 编辑提交商品
++ 请求路径：goods/:id
++ 请求方式：put
++ 请求参数
+
+|*参数名*|*参数说明*|*备注*|
+|-------|----------|------|
+|id|商品ID|不能为空`携带在url中`|
+|goods_name|商品名称|不能为空|
+|goods_price|价格|不能为空|
+|goods_number|数量|不能为空|
+|goods_weight|重量|不能为空|
++ 响应数据
+```
+{
+  "meta": {
+    "msg": "修改成功",
+    "status": 200
+  }
+}
+```
+
+### 1.8.5. 删除商品
++ 请求路径：goods/:id
++ 请求方式：delete
++ 请求参数
+
+|*参数名*|*参数说明*|*备注*|
+|-------|----------|------|
+|id|商品ID|不能为空`携带在url中`|
++ 响应数据
+```
+{
+  "meta": {
+    "msg": "删除成功",
+    "status": 200
+  }
+}
+```
+
+### 1.8.6. 上传图片
++ 请求路径：upload
++ 请求方式：post
++ 请求参数
+
+|*参数名*|*参数说明*|*备注*|
+|-------|----------|------|
+|file|上传文件||
++ 响应数据
+```
+{
+  "data": [
+    "count": 27,
+    "data": [
+      {
+        "tmp_path": "tmp_uploads\1592392343723_1561470843339.png",
+        "url": "http://127.0.0.1:8899/tmp_uploads\1592392343723_1561470843339.png"
+      }
+    ]
+  ],
+  "meta": {
+    "msg": "上传图片成功",
+    "status": 200
+  } 
+}
+```
+
+
 ## 1.9
 ### 1.9.1.订单列表数据
 + 请求路径：orders
@@ -963,22 +1164,25 @@ meta: {
 ```
 {
   "data": [
-    {
-      "order_id": 42,
-      "user_id": 133,
-      "order_number": "itcast-59e411eaaccc9",
-      "order_price": "222.00",
-      "order_pay": "2",
-      "is_send": "否",
-      "trade_no": "",
-      "order_fapiao_title": "公司",
-      "order_fapiao_company": "高大上公司",
-      "order_fapiao_content": "体育休闲",
-      "consignee_addr": "2",
-      "pay_status": "0",
-      "createdAt": 1508119018,
-      "updatedAt": 1508119018
-    }
+    "count": 27,
+    "data": [
+      {
+        "order_id": 42,
+        "user_id": 133,
+        "order_number": "itcast-59e411eaaccc9",
+        "order_price": "222.00",
+        "order_pay": "2",
+        "is_send": "否",
+        "trade_no": "",
+        "order_fapiao_title": "公司",
+        "order_fapiao_company": "高大上公司",
+        "order_fapiao_content": "体育休闲",
+        "consignee_addr": "2",
+        "pay_status": "0",
+        "createdAt": 1508119018,
+        "updatedAt": 1508119018
+      }
+    ]
   ],
   "meta": {
     "msg": "获取成功",
@@ -987,7 +1191,52 @@ meta: {
 }
 ```
 
-### 1.9.2.修改订单状态
+### 1.9.2. 根据 ID 查询订单
++ 请求路径：orders/:id
++ 请求方式：get
++ 请求参数
+
+|*参数名*|*参数说明*|*备注*|
+|-------|----------|------|
+|id|订单 ID|不能为空`携带在url中`|
+- 响应参数
+
+|参数名|参数说明|备注|
+|-------|----------|------|
+|user_id|用户ID|可以为空|
+|pay_status|支付状态|可以为空|
+|is_send|是否发货|可以为空|
+|order_fapiao_title|['个人','公司']|可以为空|
+|order_fapiao_company|公司名称|可以为空|
+|order_fapiao_content|发票内容|可以为空|
+|consignee_addr|发货地址|可以为空|
++ 响应数据
+```
+{
+  "data": {
+    "order_id": 42,
+    "user_id": 133,
+    "order_number": "itcast-59e411eaaccc9",
+    "order_price": "123.00",
+    "order_pay": "2",
+    "is_send": "是",
+    "trade_no": "",
+    "order_fapiao_title": "公司",
+    "order_fapiao_company": "高大上公司",
+    "order_fapiao_content": "体育休闲",
+    "consignee_addr": "2",
+    "pay_status": "0",
+    "createdtime": 1591807342,
+    "updatedtime": 1591807342
+  },
+  "meta": {
+    "msg": "获取成功",
+    "status": 200
+  }
+}
+``` 
+
+### 1.9.3.修改订单状态
 + 请求路径：orders/:id
 + 请求方式：put
 + 请求参数
@@ -998,7 +1247,6 @@ meta: {
 |is_send|订单是否发货|1:已经发货，0:未发货|
 |order_pay|订单支付|支付方式0未支付1支付宝2微信3银行卡|
 |order_price|订单价格||
-|order_number|订单数量||
 |pay_status|支付状态|订单状态：0未付款、1已付款|
 + 响应数据
 ```
@@ -1010,7 +1258,7 @@ meta: {
 }
 ```
 
-### 1.9.3.查看订单详情
+### 1.9.4.查看订单详情
 + 请求路径：orders/:id
 + 请求方式：get
 + 请求参数
@@ -1063,7 +1311,7 @@ meta: {
 ```
 
 
-### 1.9.4.查看物流信息
+### 1.9.5.查看物流信息
 + 请求路径：/kuaidi/:id
 + 请求方式：get
 + 供测试的物流单号：1106975712662
